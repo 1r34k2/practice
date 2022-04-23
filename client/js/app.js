@@ -102,7 +102,7 @@ var tagOrg = function(toDoObjects) {
 };
 
 $(document).ready(function() {
-    jQuery.getJSON("js/todos.json", function(toDoObjects) {
+    jQuery.getJSON("todos.json", function(toDoObjects) {
         main(toDoObjects);
     });
 });

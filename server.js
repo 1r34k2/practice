@@ -31,7 +31,10 @@ var express = require("express"),
 app.use(express.static(__dirname + "/client"));
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://localhost/amazeriffic');
+mongoose.connect('mongodb://localhost/amazeriffic',{
+    useNewUrlParser:true,
+    useUnifiedTopology:true
+});
 
 var ToDoSchema = mongoose.Schema({
     description: String,
@@ -40,7 +43,7 @@ var ToDoSchema = mongoose.Schema({
 
 var ToDo = mongoose.model("ToDo", ToDoSchema);
 
-http.createServer(app).listen(3000);
+
 
 
 app.get("/todos.json", function(req, res) {
@@ -70,3 +73,4 @@ app.post("/todos", function(req, res) {
         }
     })
 })
+http.createServer(app).listen(3000);
