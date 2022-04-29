@@ -1,76 +1,39 @@
 var express = require("express"),
     http = require("http"),
     mongoose = require("mongoose"),
-    app = express(),
-    toDos = [{
-            "description": "Купить продукты",
-            "tags": ["шопинг", "рутина"]
-        },
-        {
-            "description": "Сделать несколько новых задач",
-            "tags": ["писательство", "работа"]
-        },
-        {
-            "description": "Подготовиться к лекции в понедельник",
-            "tags": ["работа", "преподавание"]
-        },
-        {
-            "description": "Ответить на электронные письма",
-            "tags": ["работа"]
-        },
-        {
-            "description": "Вывести Грейси на прогулку в парк",
-            "tags": ["рутина", "питомцы"]
-        },
-        {
-            "description": "Закончить писать книгу",
-            "tags": ["писательство", "работа"]
-        }
-    ];
+    ToDosController = require("./controllers/todos_controller.js"),
+    UsersController = require("./controllers/users_controller.js"),
+    app = express();
 
-app.use(express.static(__dirname + "/client"));
+http.createServer(app).listen(3000);
+
+app.use('/', express.static(__dirname + "/client"));
+app.use('/user/:username', express.static(__dirname + "/client"));
+
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://localhost/amazeriffic',{
-    useNewUrlParser:true,
-    useUnifiedTopology:true
+mongoose.connect('mongodb://localhost/amazeriffic', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(res => {
+    console.log("DB Connected!")
+}).catch(err => {
+    console.log(Error, err.message);
 });
 
-var ToDoSchema = mongoose.Schema({
-    description: String,
-    tags: [String]
-})
+app.get("/todos.json", ToDosController.index);
+app.get("/todos/:id", ToDosController.show);
+app.post("/todos", ToDosController.create);
+app.put("/todos/:id", ToDosController.update);
+app.delete("/todos/:id", ToDosController.destroy);
 
-var ToDo = mongoose.model("ToDo", ToDoSchema);
+app.get("/users/:username/todos.json", ToDosController.index);
+app.post("/users/:username/todos", ToDosController.create);
+app.put("/users/:username/todos/:id", ToDosController.update);
+app.delete("/users/:username/todos/:id", ToDosController.destroy);
 
-
-
-
-app.get("/todos.json", function(req, res) {
-    ToDo.find({}, function(err, toDos) {
-        if (err !== null) console.log("Error: " + err)
-        else res.json(toDos);
-    })
-});
-
-
-app.post("/todos", function(req, res) {
-    console.log(req.body);
-    var newToDo = new ToDo({
-        "description": req.body.description,
-        "tags": req.body.tags
-    })
-    newToDo.save(function(err, result) {
-        if (err !== null) {
-            console.log("Error: " + err);
-            res.send("ERROR");
-        } else {
-            ToDo.find({}, function(err, result) {
-                if (err !== null) {
-                    res.send("ERROR");
-                } else res.json(result);
-            })
-        }
-    })
-})
-http.createServer(app).listen(3000);
+app.get("/users.json", UsersController.index);
+app.post("/users", UsersController.create);
+app.get("/users/:username", UsersController.show);
+app.put("/users/:username", UsersController.update);
+app.delete("/users/:username", UsersController.destroy);
